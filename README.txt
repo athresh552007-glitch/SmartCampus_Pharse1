@@ -27,5 +27,5 @@ RENDER DEPLOYMENT
 3. Set the build command to: pip install -r requirements.txt
 4. Set the start command to: gunicorn app:app
 5. Add GEMINI_API_KEY in the Render service's Environment settings. Never commit the key.
-6. Optionally set GEMINI_MODEL (defaults to gemini-2.5-flash), then deploy.
+6. Optionally set GEMINI_MODEL (defaults to gemini-3.8-flash), then deploy.
 7. Open the Render service URL and test the chat.

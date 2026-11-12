@@ -81,7 +81,7 @@ def chat():
     try:
         with genai.Client(api_key=api_key) as client:
             response = client.models.generate_content(
-                model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+                model=os.environ.get("GEMINI_MODEL", "gemini-3.8-flash"),
                 contents=question,
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt,

@@ -31,7 +31,7 @@ class ChatRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json(), {"answer": "Check your college portal."})
         self.assertEqual(
-            mock_client.models.generate_content.call_args.kwargs["model"], "gemini-2.5-flash"
+            mock_client.models.generate_content.call_args.kwargs["model"], "gemini-3.8-flash"
         )
         self.assertEqual(
             mock_client.models.generate_content.call_args.kwargs["contents"],
