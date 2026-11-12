@@ -2,6 +2,7 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
+import httpx
 import app
 
 
@@ -22,7 +23,7 @@ class ChatRouteTests(unittest.TestCase):
         mock_client.models.generate_content.return_value = response
 
         with patch.dict(os.environ, {"GEMINI_API_KEY": "test-key"}):
-            with patch.object(app.genai, "Client", return_value=mock_client):
+            with patch.object(app.genai, "Client", return_value=mock_client) as genai_client:
                 response = self.client.post(
                     "/api/chat",
                     json={"question": "Where can I find my syllabus?", "language": "en-IN"},
@@ -36,6 +37,10 @@ class ChatRouteTests(unittest.TestCase):
         self.assertEqual(
             mock_client.models.generate_content.call_args.kwargs["contents"],
             "Where can I find my syllabus?",
+        )
+        self.assertEqual(
+            genai_client.call_args.kwargs["http_options"].timeout,
+            45_000,
         )
         config = mock_client.models.generate_content.call_args.kwargs["config"]
         self.assertIn("Reply in English", config.system_instruction)
@@ -59,6 +64,18 @@ class ChatRouteTests(unittest.TestCase):
         self.assertEqual(result.get_json(), {"answer": "Hello!"})
         self.assertEqual(mock_client.models.generate_content.call_count, 2)
         sleep.assert_called_once_with(1)
+
+    def test_chat_reports_gemini_timeout(self):
+        mock_client = MagicMock()
+        mock_client.__enter__.return_value = mock_client
+        mock_client.models.generate_content.side_effect = httpx.ReadTimeout("request timed out")
+
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "test-key"}):
+            with patch.object(app.genai, "Client", return_value=mock_client):
+                result = self.client.post("/api/chat", json={"question": "Hello"})
+
+        self.assertEqual(result.status_code, 504)
+        self.assertIn("too long", result.get_json()["error"])
 
     def test_chat_rejects_empty_question(self):
         response = self.client.post("/api/chat", json={"question": "  "})

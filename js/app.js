@@ -77,7 +77,9 @@ async function sendQuestion(question) {
     replyBubble.textContent = data.answer;
   } catch (error) {
     console.error('Chat request failed:', error);
-    replyBubble.textContent = 'Sorry, I could not reach the assistant. Please try again in a moment.';
+    replyBubble.textContent = error instanceof Error && error.message !== 'Failed to fetch'
+      ? error.message
+      : 'Sorry, I could not reach the assistant. Please try again in a moment.';
   } finally {
     isSending = false;
     input.disabled = false;

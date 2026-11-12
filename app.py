@@ -2,6 +2,7 @@ import os
 import time
 from pathlib import Path
 
+import httpx
 from flask import Flask, jsonify, request, send_from_directory
 from google import genai
 from google.genai import errors, types
@@ -82,7 +83,10 @@ def chat():
     try:
         for attempt in range(3):
             try:
-                with genai.Client(api_key=api_key) as client:
+                with genai.Client(
+                    api_key=api_key,
+                    http_options=types.HttpOptions(timeout=45_000),
+                ) as client:
                     response = client.models.generate_content(
                         model=os.environ.get("GEMINI_MODEL", "gemini-3.8-flash"),
                         contents=question,
@@ -99,6 +103,9 @@ def chat():
     except errors.APIError:
         app.logger.exception("Gemini chat request failed.")
         return jsonify(error="The assistant could not respond right now. Please try again."), 502
+    except httpx.TimeoutException:
+        app.logger.exception("Gemini chat request timed out.")
+        return jsonify(error="The assistant took too long to respond. Please try again."), 504
 
     answer = response.text
     if not answer or not answer.strip():
