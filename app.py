@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -79,15 +80,22 @@ def chat():
     )
 
     try:
-        with genai.Client(api_key=api_key) as client:
-            response = client.models.generate_content(
-                model=os.environ.get("GEMINI_MODEL", "gemini-3.8-flash"),
-                contents=question,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_prompt,
-                    max_output_tokens=500,
-                ),
-            )
+        for attempt in range(3):
+            try:
+                with genai.Client(api_key=api_key) as client:
+                    response = client.models.generate_content(
+                        model=os.environ.get("GEMINI_MODEL", "gemini-3.8-flash"),
+                        contents=question,
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_prompt,
+                            max_output_tokens=500,
+                        ),
+                    )
+                break
+            except errors.APIError as error:
+                if error.code != 503 or attempt == 2:
+                    raise
+                time.sleep(2**attempt)
     except errors.APIError:
         app.logger.exception("Gemini chat request failed.")
         return jsonify(error="The assistant could not respond right now. Please try again."), 502

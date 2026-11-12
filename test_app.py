@@ -41,6 +41,25 @@ class ChatRouteTests(unittest.TestCase):
         self.assertIn("Reply in English", config.system_instruction)
         self.assertEqual(config.max_output_tokens, 500)
 
+    def test_chat_retries_temporary_gemini_unavailable_error(self):
+        response = MagicMock(text="Hello!")
+        mock_client = MagicMock()
+        mock_client.__enter__.return_value = mock_client
+        mock_client.models.generate_content.side_effect = [
+            app.errors.ServerError(503, {"error": {"message": "Temporarily unavailable"}}),
+            response,
+        ]
+
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "test-key"}):
+            with patch.object(app.genai, "Client", return_value=mock_client):
+                with patch.object(app.time, "sleep") as sleep:
+                    result = self.client.post("/api/chat", json={"question": "Hello"})
+
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.get_json(), {"answer": "Hello!"})
+        self.assertEqual(mock_client.models.generate_content.call_count, 2)
+        sleep.assert_called_once_with(1)
+
     def test_chat_rejects_empty_question(self):
         response = self.client.post("/api/chat", json={"question": "  "})
 
