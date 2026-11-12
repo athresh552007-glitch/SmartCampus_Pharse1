@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
-from openai import OpenAI, OpenAIError
+from google import genai
+from google.genai import errors, types
 from werkzeug.exceptions import HTTPException
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -62,9 +63,9 @@ def chat():
     if language not in language_names:
         return jsonify(error="Choose English, Kannada, or Hindi."), 400
 
-    api_key = os.environ.get("OPENAI_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        app.logger.error("OPENAI_API_KEY is not configured.")
+        app.logger.error("GEMINI_API_KEY is not configured.")
         return jsonify(error="The assistant is not configured yet. Please try again later."), 503
 
     college_context = f" The selected college is {college.strip()}." if college.strip() else ""
@@ -78,22 +79,22 @@ def chat():
     )
 
     try:
-        with OpenAI(api_key=api_key) as client:
-            completion = client.chat.completions.create(
-                model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": question},
-                ],
-                max_tokens=500,
+        with genai.Client(api_key=api_key) as client:
+            response = client.models.generate_content(
+                model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+                contents=question,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    max_output_tokens=500,
+                ),
             )
-    except OpenAIError:
-        app.logger.exception("OpenAI chat request failed.")
+    except errors.APIError:
+        app.logger.exception("Gemini chat request failed.")
         return jsonify(error="The assistant could not respond right now. Please try again."), 502
 
-    answer = completion.choices[0].message.content if completion.choices else None
+    answer = response.text
     if not answer or not answer.strip():
-        app.logger.error("OpenAI returned an empty chat response.")
+        app.logger.error("Gemini returned an empty chat response.")
         return jsonify(error="The assistant returned an empty response. Please try again."), 502
 
     return jsonify(answer=answer.strip())

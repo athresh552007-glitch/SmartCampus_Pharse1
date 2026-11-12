@@ -16,14 +16,13 @@ class ChatRouteTests(unittest.TestCase):
             response.close()
 
     def test_chat_returns_ai_answer(self):
-        completion = MagicMock()
-        completion.choices = [MagicMock(message=MagicMock(content="Check your college portal."))]
+        response = MagicMock(text="Check your college portal.")
         mock_client = MagicMock()
         mock_client.__enter__.return_value = mock_client
-        mock_client.chat.completions.create.return_value = completion
+        mock_client.models.generate_content.return_value = response
 
-        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
-            with patch.object(app, "OpenAI", return_value=mock_client):
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "test-key"}):
+            with patch.object(app.genai, "Client", return_value=mock_client):
                 response = self.client.post(
                     "/api/chat",
                     json={"question": "Where can I find my syllabus?", "language": "en-IN"},
@@ -32,8 +31,15 @@ class ChatRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json(), {"answer": "Check your college portal."})
         self.assertEqual(
-            mock_client.chat.completions.create.call_args.kwargs["model"], "gpt-4o-mini"
+            mock_client.models.generate_content.call_args.kwargs["model"], "gemini-2.5-flash"
         )
+        self.assertEqual(
+            mock_client.models.generate_content.call_args.kwargs["contents"],
+            "Where can I find my syllabus?",
+        )
+        config = mock_client.models.generate_content.call_args.kwargs["config"]
+        self.assertIn("Reply in English", config.system_instruction)
+        self.assertEqual(config.max_output_tokens, 500)
 
     def test_chat_rejects_empty_question(self):
         response = self.client.post("/api/chat", json={"question": "  "})
@@ -50,8 +56,8 @@ class ChatRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.get_json())
 
-    def test_chat_reports_missing_api_key(self):
-        with patch.dict(os.environ, {"OPENAI_API_KEY": ""}):
+    def test_chat_reports_missing_gemini_api_key(self):
+        with patch.dict(os.environ, {"GEMINI_API_KEY": ""}, clear=False):
             response = self.client.post("/api/chat", json={"question": "Hello"})
 
         self.assertEqual(response.status_code, 503)
