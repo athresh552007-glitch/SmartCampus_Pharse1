@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartCampus | AI Student Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#"><span class="brand-mark">S</span><span>SmartCampus<small>AI STUDENT ASSISTANT</small></span></a>
+      <button class="new-chat" id="newChatBtn">＋ <span>New conversation</span></button>
+      <p class="side-label">WORKSPACE</p>
+      <a class="side-link active" href="#dashboard">▦ <span>Dashboard</span></a>
+      <a class="side-link" href="#chat">✧ <span>AI Assistant</span></a>
+      <a class="side-link" href="#services">▤ <span>Student services</span></a>
+      <a class="side-link" href="#history">◷ <span>Chat history</span></a>
+      <div class="sidebar-bottom">
+        <div class="help-card"><span class="help-icon">?</span><div><b>Need help?</b><small>Explore how SmartCampus works.</small></div></div>
+        <div class="profile"><div class="avatar">ST</div><div><b>Student</b><small>Guest account</small></div><span class="dots">•••</span></div>
+      </div>
+    </aside>
+
+    <main class="main-content" id="dashboard">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">☰</button>
+        <div class="breadcrumb">Workspace <span>/</span> <b>Dashboard</b></div>
+        <div class="top-actions"><span class="status-dot"></span><span class="online-text">Assistant online</span><button class="icon-btn" aria-label="Notifications">♧</button></div>
+      </header>
+
+      <section class="welcome-row">
+        <div><p class="eyebrow">YOUR CAMPUS COMPANION</p><h1>How can we help you <span>today?</span></h1><p class="subtitle">Get quick answers to your college questions, anytime.</p></div>
+        <div class="date-pill">✦ &nbsp; Smart support, made simple</div>
+      </section>
+
+      <section class="college-panel">
+        <div class="college-icon">⌂</div>
+        <div class="college-copy"><b>Choose your college</b><small>We'll use this to give you more relevant answers.</small></div>
+        <select id="collegeSelect" aria-label="Choose your college">
+          <option value="">Select your college</option>
+          <option>Sapthagiri NPS University</option>
+          <option>Other college</option>
+        </select>
+      </section>
+
+      <section class="chat-layout" id="chat">
+        <div class="chat-card">
+          <div class="chat-heading"><div class="bot-avatar">✧</div><div><b>SmartCampus AI</b><small><span class="status-dot"></span> Ready to help</small></div><button class="more-btn" title="More options">•••</button></div>
+          <div class="messages" id="messages" aria-live="polite">
+            <div class="message bot-message"><div class="message-avatar">✧</div><div class="bubble-wrap"><span class="sender">SMARTCAMPUS AI</span><div class="bubble">Hello! 👋 I'm your SmartCampus assistant. Ask me about academics, exams, attendance, campus facilities or student life.</div><span class="time">Just now</span></div></div>
+            <div class="suggestion-label">TRY ASKING</div>
+            <div class="suggestions">
+              <button class="suggestion">What is the attendance requirement?</button>
+              <button class="suggestion">How can I find my syllabus?</button>
+              <button class="suggestion">Tell me about placement support</button>
+            </div>
+          </div>
+          <form class="composer" id="chatForm">
+            <input id="messageInput" type="text" placeholder="Ask anything about your college..." autocomplete="off" aria-label="Type your question">
+            <button type="button" class="voice-btn" id="voiceBtn" title="Use voice input" aria-label="Use voice input">🎙</button>
+            <button type="submit" class="send-btn" aria-label="Send message">➤</button>
+          </form>
+          <p class="disclaimer">SmartCampus can make mistakes. Verify important information with your college.</p>
+        </div>
+        <aside class="quick-panel">
+          <div class="quick-title"><div><p class="eyebrow">EXPLORE</p><h2>Student services</h2></div><span class="sparkle">✦</span></div>
+          <button class="service-item" data-prompt="How can I get academic information?"><span class="service-icon purple">▤</span><span><b>Academics</b><small>Syllabus, subjects and notes</small></span><i>↗</i></button>
+          <button class="service-item" data-prompt="Where can I find exam information?"><span class="service-icon blue">▣</span><span><b>Examinations</b><small>Schedules and exam guidance</small></span><i>↗</i></button>
+          <button class="service-item" data-prompt="Tell me about attendance rules."><span class="service-icon green">◷</span><span><b>Attendance</b><small>Rules and attendance queries</small></span><i>↗</i></button>
+          <button class="service-item" data-prompt="What placement and career support is available?"><span class="service-icon orange">✧</span><span><b>Career & placements</b><small>Internships and career support</small></span><i>↗</i></button>
+          <div class="language-box"><div><b>Conversation language</b><small>Choose your preferred language</small></div><select id="languageSelect" aria-label="Conversation language"><option value="en-IN">English</option><option value="kn-IN">ಕನ್ನಡ (Kannada)</option><option value="hi-IN">हिन्दी (Hindi)</option></select></div>
+        </aside>
+      </section>
+      <footer>© 2026 SmartCampus <span>Built to make student life easier.</span></footer>
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
